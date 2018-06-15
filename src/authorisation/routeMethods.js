@@ -160,14 +160,15 @@ function isAuthorised(req, res, success) {
             dbHelper.checkUserAuthorization(authResult.bearerToken, (error, result) => {
                 if (error) {
                     console.log("User authorization error: ", error);
-                    error(); // TODO
+                    //error(); // TODO
                 }
                 else
                 {
                     if (result.length === 0)
                     {
                         console.log("No result from user authorization");
-                        error(); // TODO
+
+                        //error(); // TODO
                     }
                     else
                     {
