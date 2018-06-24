@@ -24,13 +24,13 @@ router.post('/cancelTransaction', authRoutesMethods.isAuthorised, routeMethods.a
 router.post('/mileage', authRoutesMethods.isAuthorised, routeMethods.updateMileage);
 
 /* POST stva register. */
-router.post('/register', authRoutesMethods.isAuthorised, routeMethods.stvaRegister);
+router.post('/register', authRoutesMethods.isAuthorised, routeMethods.registerOrUpdateOwner);
 
 /* POST shop entry. */
-router.post('/service', authRoutesMethods.isAuthorised, routeMethods.shopService);
+router.post('/service', authRoutesMethods.isAuthorised, routeMethods.insertService);
 
 /* POST tuev entry. */
-router.post('/tuev', authRoutesMethods.isAuthorised, routeMethods.tuevEntry);
+router.post('/tuev', authRoutesMethods.isAuthorised, routeMethods.insertMainInspection);
 
 
 module.exports = router;
