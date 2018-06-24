@@ -6,9 +6,9 @@ let dbConnection = null;
 async function query(queryString) {
 
     if (dbConnection == null) {
-        const conSuccess = await initConnection();
+        const connSuccess = await initConnection();
 
-        if (!conSuccess) {
+        if (!connSuccess) {
             return null;
         }
     }

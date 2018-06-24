@@ -6,8 +6,6 @@ import { MAILACCOUNT } from "../passwords";
 import sha256 from 'sha256';
 import { generate } from 'generate-password';
 
-/* handles the api call to register the user and insert them into the users table.
-  The req body should contain an email and a password. */
 async function registerUser(req, res) {
 
     if (req.body.email == null || req.body.password == null || req.body.authorityLevel == null ||
@@ -158,7 +156,6 @@ async function blockUser(req, res) {
     }
 }
 
-//VINI.de/api/users
 async function getUsers(req, res) {
 
     if (req.body.authorityLevel !== USER_LEVEL.ASTVA) {
@@ -184,7 +181,6 @@ async function getUsers(req, res) {
     }
 }
 
-
 function login(req, res) {
     console.log("Authorization successful");
     let status = req.body.blocked !== null && req.body.blocked === false ? "success" : "failure";
@@ -202,7 +198,7 @@ function login(req, res) {
 async function isAuthorised(req, res, next) {
 
     if (req.get("Authorization") == null) {
-        errorHandling(res, 406, "No bearer_token found in header.");
+        handleError(res, 406, "No bearer_token found in header.");
         return;
     }
     const token = req.get("Authorization").slice("Bearer ".length);
@@ -211,13 +207,13 @@ async function isAuthorised(req, res, next) {
     const authResult = await dbHelper.checkUserAuthorization(token);
 
     if (authResult == null || authResult.length === 0) {
-        errorHandling(res, 403, "Bitte neu einloggen.");
+        handleError(res, 403, "Bitte neu einloggen.");
     }
     else if ((Date.parse(authResult[3]) - Date.now()) < 0) {
-        errorHandling(res, 401, "Das Bearer-Token ist abgelaufen.");
+        handleError(res, 401, "Das Bearer-Token ist abgelaufen.");
     }
     else if (authResult[0] === true) {
-        errorHandling(res, 401, "Der Benutzer wurde blockiert.");
+        handleError(res, 401, "Der Benutzer wurde blockiert.");
     }
     else {
         req.body.blocked = authResult[0];
@@ -227,7 +223,7 @@ async function isAuthorised(req, res, next) {
     }
 }
 
-function errorHandling(response, status, message) {
+function handleError(response, status, message) {
     const url = require('url');
     const query = url.format({
         pathname: '/error',
@@ -323,6 +319,5 @@ module.exports = {
     "isAuthorised": isAuthorised,
     "blockUser": blockUser,
     "getUsers": getUsers,
-    "errorHandling": errorHandling,
     "resetPassword": resetPassword
 };

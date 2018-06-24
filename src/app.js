@@ -46,7 +46,7 @@ userRoutes.initRoutes(app);
 
 app.use(cors());
 
-/* Setup the oAuth error handling */
+// Setup the oAuth error handling
 app.use(app.oauth.errorHandler());
 
 app.use(logger('dev'));
@@ -67,7 +67,7 @@ app.use((req, res, next) => {
 app.listen(port);
 console.log("HTTP-Server is running on", "http://localhost:" + port, " or", "http://vini-ethereum.westeurope.cloudapp.azure.com/\n");
 
-// Remove expired Bearer Token every 5 Minutes
+// Remove expired Bearer Token every 5 Minutes = 3000000 ms
 setInterval(tokenDBHelper.deleteExpiredTokens, 300000);
 
 

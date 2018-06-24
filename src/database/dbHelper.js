@@ -16,24 +16,6 @@ async function registerCarInDB(vin, privateKey, publicKey, creationDate) {
     return await dbConnection.query(queryString);
 }
 
-async function getUserFromCredentials(email, password) {
-
-    const queryString = `SELECT * FROM users WHERE email = '${email}' AND password = '${password}';`;
-
-    const result = await dbConnection.query(queryString);
-
-    if (result == null || result.length === 0) {
-        console.log("Invalid credentials");
-        return null;
-    }
-
-    return {
-        "id": result[0],
-        "email": result[1],
-        "password": result[2]
-    };
-}
-
 async function doesUserExist(email) {
 
     const queryString = `SELECT * FROM users WHERE email = '${email}'`;
@@ -71,7 +53,54 @@ async function getCarAddressFromVin(vin) {
     return null;
 }
 
-async function getUserInfoFromToken(token) {
+async function getAllUsers() {
+    const queryString = `SELECT * FROM users WHERE users.blocked = 'false'`;
+
+    const results = await dbConnection.query(queryString);
+
+    if (results == null) {
+        return null;
+    }
+
+    // Cut array into right size
+    let users = [];
+
+    for (let i = 0; i < results.length; i += 11) {
+        users.push(results.slice(i, i + 11));
+    }
+
+    return users.map(element => {
+        return {
+            date: element[8],
+            forename: element[5],
+            surname: element[6],
+            authorityLevel: element[4],
+            email: element[1],
+            company: element[7]
+
+        };
+    });
+}
+
+async function getUserFromCredentials(email, password) {
+
+    const queryString = `SELECT * FROM users WHERE email = '${email}' AND password = '${password}';`;
+
+    const result = await dbConnection.query(queryString);
+
+    if (result == null || result.length === 0) {
+        console.log("Invalid credentials");
+        return null;
+    }
+
+    return {
+        "id": result[0],
+        "email": result[1],
+        "password": result[2]
+    };
+}
+
+async function getUserFromToken(token) {
     const queryString = `SELECT * FROM users WHERE id = (SELECT user_id FROM bearer_tokens WHERE token = '${token}')`;
 
     const result = await dbConnection.query(queryString);
@@ -94,7 +123,7 @@ async function getUserInfoFromToken(token) {
     }
 }
 
-async function getUserInfoFromUserId(userId) {
+async function getUserFromUserId(userId) {
     const queryString = `SELECT * FROM users WHERE id = ${userId}`;
 
     const result = await dbConnection.query(queryString);
@@ -127,35 +156,6 @@ async function checkUserAuthorization(token) {
     const queryString = `SELECT users.blocked, users.id, users.authorityLevel, tokens.expiration FROM users, bearer_tokens as tokens WHERE users.id = tokens.user_id AND tokens.token = '${token}'`;
 
     return await dbConnection.query(queryString);
-}
-
-async function getAllUsers() {
-    const queryString = `SELECT * FROM users WHERE users.blocked = 'false'`;
-
-    const results = await dbConnection.query(queryString);
-
-    if (results == null) {
-        return null;
-    }
-
-    // Cut array into right size
-    let users = [];
-
-    for (let i = 0; i < results.length; i += 11) {
-        users.push(results.slice(i, i + 11));
-    }
-
-    return users.map(element => {
-        return {
-            date: element[8],
-            forename: element[5],
-            surname: element[6],
-            authorityLevel: element[4],
-            email: element[1],
-            company: element[7]
-
-        };
-    });
 }
 
 async function getHeadTransactionHash(publicKeyCar) {
@@ -246,18 +246,6 @@ async function acceptAnnulment(hash, applicant) {
     return await dbConnection.query(queryString)
 }
 
-async function getVinByPublicKey(publicKey) {
-    const queryString = `SELECT vin from kfz WHERE publicKey = '${toBasicString(publicKey)}'`;
-
-    return await dbConnection.query(queryString);
-}
-
-async function getUserByID(userID) {
-    const queryString = `SELECT email from users WHERE id = '${userID}'`;
-
-    return await dbConnection.query(queryString);
-}
-
 
 module.exports = {
     "registerUserInDB": registerUserInDB,
@@ -266,8 +254,8 @@ module.exports = {
     "doesUserExist": doesUserExist,
     "blockUserInDB": blockUserInDB,
     "getCarAddressFromVin": getCarAddressFromVin,
-    "getUserInfoFromToken": getUserInfoFromToken,
-    "getUserInfoFromUserId": getUserInfoFromUserId,
+    "getUserFromToken": getUserFromToken,
+    "getUserFromUserId": getUserFromUserId,
     "checkUserAuthorization": checkUserAuthorization,
     "getAllUsers": getAllUsers,
     "getAllAnnulmentTransactions": getAllAnnulmentTransactions,
@@ -277,7 +265,5 @@ module.exports = {
     "insertAnnulment": insertAnnulment,
     "rejectAnnulment": rejectAnnulment,
     "acceptAnnulment": acceptAnnulment,
-    "getVinByPublicKey": getVinByPublicKey,
-    "getUserByID": getUserByID,
     "updatePassword": updatePassword
 };

@@ -47,9 +47,9 @@ async function updateMileage(req, res) {
     }
 
     const token = req.get("Authorization").slice("Bearer ".length);
-    const userInfo = await dbHelper.getUserInfoFromToken(token);
+    const user = await dbHelper.getUserFromToken(token);
 
-    if (userInfo == null) {
+    if (user == null) {
         console.log("Could not find user for token:", token);
         res.status(400);
         res.json({
@@ -68,10 +68,10 @@ async function updateMileage(req, res) {
         return;
     }
 
-    const transaction = new Transaction(userInfo.publicKey, userInfo.email, req.body.vin, preTransaction, carAddress, req.body.timestamp);
+    const transaction = new Transaction(user.publicKey, user.email, req.body.vin, preTransaction, carAddress, req.body.timestamp);
     transaction.setMileage(req.body.mileage);
 
-    const transHash = await ethNode.sendSignedTransaction(transaction, userInfo.privateKey);
+    const transHash = await ethNode.sendSignedTransaction(transaction, user.privateKey);
 
     if (transHash == null) {
         console.log("An error occurred while sending transaction: ", transaction);
@@ -179,7 +179,7 @@ async function getCarByVin(req, res) {
     });
 }
 
-async function shopService(req, res) {
+async function insertService(req, res) {
     if (req.body.vin == null || req.body.timestamp == null || req.body.mileage == null || req.body.service1 == null ||
         req.body.service2 == null || req.body.oilChange == null) {
         console.log("Invalid request on shop service: ", req.body);
@@ -196,7 +196,6 @@ async function shopService(req, res) {
         res.json({
             "message": "User is not authorized to make service entry for car"
         });
-
         return;
     }
 
@@ -211,9 +210,9 @@ async function shopService(req, res) {
     }
 
     const token = req.get("Authorization").slice("Bearer ".length);
-    const userInfo = await dbHelper.getUserInfoFromToken(token);
+    const user = await dbHelper.getUserFromToken(token);
 
-    if (userInfo == null) {
+    if (user == null) {
         console.log("Could not find user for token:", token);
         res.status(400);
         res.json({
@@ -232,13 +231,13 @@ async function shopService(req, res) {
         return;
     }
 
-    const transaction = new Transaction(userInfo.publicKey, userInfo.email, req.body.vin, preTransaction, carAddress, req.body.timestamp);
+    const transaction = new Transaction(user.publicKey, user.email, req.body.vin, preTransaction, carAddress, req.body.timestamp);
     transaction.setMileage(req.body.mileage);
     transaction.setServiceOne(req.body.service1);
     transaction.setServiceTwo(req.body.service2);
     transaction.setOilChange(req.body.oilChange);
 
-    const transHash = await ethNode.sendSignedTransaction(transaction, userInfo.privateKey);
+    const transHash = await ethNode.sendSignedTransaction(transaction, user.privateKey);
 
     if (transHash == null) {
         console.log("An error occurred while sending transaction: \n", transaction);
@@ -254,8 +253,7 @@ async function shopService(req, res) {
     });
 }
 
-async function tuevEntry(req, res) {
-    const token = req.get("Authorization").slice("Bearer ".length);
+async function insertMainInspection(req, res) {
 
     if (req.body.vin == null || req.body.timestamp == null ||
         req.body.mileage == null || req.body.nextCheck == null) {
@@ -285,9 +283,10 @@ async function tuevEntry(req, res) {
         return;
     }
 
-    const userInfo = await dbHelper.getUserInfoFromToken(token);
+    const token = req.get("Authorization").slice("Bearer ".length);
+    const user = await dbHelper.getUserFromToken(token);
 
-    if (userInfo == null) {
+    if (user == null) {
         console.log("Could not find user for token:", token);
         res.status(400);
         res.json({
@@ -307,12 +306,12 @@ async function tuevEntry(req, res) {
         return;
     }
 
-    const transaction = new Transaction(userInfo.publicKey, userInfo.email, req.body.vin, preTransaction, carAddress, req.body.timestamp);
+    const transaction = new Transaction(user.publicKey, user.email, req.body.vin, preTransaction, carAddress, req.body.timestamp);
     transaction.setMileage(req.body.mileage);
     transaction.setMainInspection(true);
     transaction.setNextCheck(req.body.nextCheck);
 
-    const transHash = await ethNode.sendSignedTransaction(transaction, userInfo.privateKey);
+    const transHash = await ethNode.sendSignedTransaction(transaction, user.privateKey);
 
     if (transHash == null) {
         console.log("An error occurred while sending transaction: ", transaction);
@@ -328,7 +327,7 @@ async function tuevEntry(req, res) {
     });
 }
 
-async function stvaRegister(req, res) {
+async function registerOrUpdateOwner(req, res) {
 
     if (req.body.vin == null || req.body.timestamp == null || req.body.mileage == null || req.body.ownerCount == null) {
         console.log("Invalid request on stva-register: ", req.body);
@@ -380,9 +379,9 @@ async function stvaRegister(req, res) {
     }
 
     const token = req.get("Authorization").slice("Bearer ".length);
-    const userInfo = await dbHelper.getUserInfoFromToken(token);
+    const user = await dbHelper.getUserFromToken(token);
 
-    if (userInfo == null) {
+    if (user == null) {
         console.log("Could not find user for token:", token);
         res.status(400);
         res.json({
@@ -391,11 +390,11 @@ async function stvaRegister(req, res) {
         return;
     }
 
-    const transaction = new Transaction(userInfo.publicKey, userInfo.email, req.body.vin, preTransaction, carAddress, req.body.timestamp);
+    const transaction = new Transaction(user.publicKey, user.email, req.body.vin, preTransaction, carAddress, req.body.timestamp);
     transaction.setMileage(req.body.mileage);
     transaction.setPreOwner(req.body.ownerCount);
 
-    const transHash = await ethNode.sendSignedTransaction(transaction, userInfo.privateKey);
+    const transHash = await ethNode.sendSignedTransaction(transaction, user.privateKey);
 
     if (transHash == null) {
         console.log("An error occurred while sending transaction: ", transaction);
@@ -484,7 +483,7 @@ async function insertAnnulmentTransaction(req, res) {
         return;
     }
 
-    const creator = await dbHelper.getUserInfoFromToken(token);
+    const creator = await dbHelper.getUserFromToken(token);
 
     if (creator == null || creator.length === 0) {
         console.log("Could not get creator from bearer token:", token);
@@ -641,7 +640,7 @@ async function acceptAnnulmentTransaction(req, res) {
         return;
     }
 
-    const stvaEmployee = await dbHelper.getUserInfoFromToken(token);
+    const stvaEmployee = await dbHelper.getUserFromToken(token);
 
     if (stvaEmployee == null || stvaEmployee.length === 0) {
         console.log("Could not get stvaEmployee from bearer token:", token);
@@ -756,9 +755,9 @@ async function acceptAnnulmentTransaction(req, res) {
 
 module.exports = {
     "updateMileage": updateMileage,
-    "shopService": shopService,
-    "tuevEntry": tuevEntry,
-    "stvaRegister": stvaRegister,
+    "insertService": insertService,
+    "insertMainInspection": insertMainInspection,
+    "registerOrUpdateOwner": registerOrUpdateOwner,
     "getCarByVin": getCarByVin,
     "getAllAnnulmentTransactions": getAllAnnulmentTransactions,
     "insertAnnulmentTransaction": insertAnnulmentTransaction,

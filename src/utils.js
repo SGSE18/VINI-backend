@@ -16,7 +16,7 @@ function toBasicString(key) {
     return key;
 }
 
-// Using UTC time (GTM + 00:00)!
+// Using UTC time (GMT + 00:00)!
 function getTimestamp() {
 
     return new Date().toISOString();
