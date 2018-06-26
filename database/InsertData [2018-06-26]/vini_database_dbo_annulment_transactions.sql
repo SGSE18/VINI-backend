@@ -1,0 +1,1 @@
+INSERT INTO [vini-database].dbo.annulment_transactions (id, transactionHash, pending, creationDate, user_id, vin, applicant) VALUES (100, '9c1b8ad754bf824936de681674f2318a856c6b9c1918ab2d059fa94a14ecc236', 0, '2018-06-25 13:07:28.120', 206, 'W0L000051T2113457', 'user@astva.com');
